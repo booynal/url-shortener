@@ -1,0 +1,14 @@
+.loginform {
+  max-width: 300px;
+  font-family: Georgia, sans-serif;
+  margin: 12em auto;
+}
+.loginformforgot {
+  float: right;
+}
+.loginformbutton {
+  width: 100%;
+}
+.verification {
+	width:170px;
+}
