@@ -1,0 +1,29 @@
+短URL设计
+
+
+业务：
+1. 从长url转换得到一个短url
+2. 从短url访问得到原始长url
+
+
+架构：
+用mysql作为持久化数据库
+用redis作为缓存数据库
+redis中缓存长到短的对应关系，1小时后过期
+用mysql的主键自增来实现长url的标记，将十进制的mysql主键转换为62进制的字符串来表示短url
+用java实现服务逻辑
+
+java服务逻辑：
+spring-boot实现restful接口
+	1. 长到短的转换
+	2. 短到长的转换
+mysql的设计
+	表设计：两张表，一个是长短URL的映射表(url_mapping)，字段为id(主键+自增)、longUrl、createTime、expiredTime。另一个是url的统计分析表(url_analyze)，字段为id、urlId、clickTime、clickIp、extInfo
+	说明：不保证长url的唯一性，即longUrl字段不做唯一性检查，这样可能造成同一个长url在表中存在多条记录
+redis的设计
+	key为长url，key的每次读写均重新设置过期时间为1小时
+	value为短url的path部分(即不含域名)
+java服务逻辑设计
+	1. 长到短，先从redis中查询是否存在缓存，如果存在则直接返回缓存的短url，否则插入mysql，将得到的id转换为62进制，缓存到redis，最后返回该短url
+	2. 短到长，先从mysql的长短url映射表中查询出长url，如果短url在mysql中存在，则插入一条数据到统计分析表并返回长url；如果短url不存在，则返回错误
+
