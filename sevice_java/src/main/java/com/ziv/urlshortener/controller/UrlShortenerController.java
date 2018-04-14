@@ -5,9 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class UrlShortenerController {
@@ -43,13 +47,40 @@ public class UrlShortenerController {
 		return shortUrl;
 	}
 
-	@RequestMapping(value = "/{shortCode}", method = RequestMethod.GET)
-	public String toLong(HttpServletRequest request, @PathVariable String shortCode) {
-		if (null == shortCode || shortCode.isEmpty()) {
+	@RequestMapping(value = "/s", method = RequestMethod.GET)
+	public String queryLong(HttpServletRequest request, @RequestParam("q") String shortUrl) {
+		if (null == shortUrl || shortUrl.isEmpty()) {
 			return null;
 		}
 
-		String fromIp = request.getRemoteAddr();
-		return urlShortenerService.short2long(shortCode, fromIp);
+		System.out.println("查询长url");
+		String shortCode = null;
+		Pattern pattern = Pattern.compile("https?://.*/([A-Za-z0-9])");
+		Matcher matcher = pattern.matcher(shortUrl);
+		if (matcher.find()) {
+			shortCode = matcher.group(1);
+		}
+		if (null != shortCode) {
+			String longUrl = urlShortenerService.short2long(shortCode, request.getRemoteAddr());
+			System.out.println(String.format("short to long: '%s' -> '%s'", shortCode, longUrl));
+			return longUrl;
+		}
+		return null;
 	}
+
+	@RequestMapping(value = "/{shortCode}", method = RequestMethod.GET)
+	public void toLong(HttpServletRequest request, HttpServletResponse response, @PathVariable String shortCode) {
+		if (null == shortCode || shortCode.isEmpty()) {
+			return;
+		}
+
+		try {
+			String longUrl = urlShortenerService.short2long(shortCode, request.getRemoteAddr());
+			System.out.println(String.format("short to long: '%s' -> '%s'", shortCode, longUrl));
+			response.sendRedirect(longUrl);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

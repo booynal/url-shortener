@@ -29,14 +29,11 @@ public class RedisProxy {
 	 * @return
 	 */
 	public String set(String longUrl, String shortUrl) {
-		Jedis jedis = jedisPool.getResource();
-		try {
+		try (Jedis jedis = jedisPool.getResource()) {
 			return jedis.setex(longUrl, expireInSec, shortUrl);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
-		} finally {
-			jedisPool.returnResourceObject(jedis);
 		}
 	}
 
@@ -47,8 +44,7 @@ public class RedisProxy {
 	 * @return
 	 */
 	public String getAndTouch(String longUrl) {
-		Jedis jedis = jedisPool.getResource();
-		try {
+		try (Jedis jedis = jedisPool.getResource()) {
 			String s = jedis.get(longUrl);
 			if (null != s) {
 				jedis.expire(longUrl, expireInSec);
@@ -56,8 +52,6 @@ public class RedisProxy {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			jedisPool.returnResourceObject(jedis);
 		}
 		return null;
 	}
