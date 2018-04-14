@@ -37,6 +37,7 @@ public class UrlShortenerService {
 			urlMapping.setCreateTime(new Date(System.currentTimeMillis()));
 			try {
 				shortCode = NumberUtil.convertDecimalTo62(urlMappingDao.insertOne(urlMapping));
+				redisProxy.set(longUrl, shortCode);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
