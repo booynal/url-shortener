@@ -68,7 +68,7 @@
 			placeholder: "please input the longUrl",
 			btnValue: "convert",
 			history: JSON.parse(localStorage.getItem('list')),
-			source: "http://192.168.199.189:8080/long/to/short?url="
+            source: "/long/to/short?url="
 		}
 
 		var ListComponent = React.createClass({
@@ -78,7 +78,7 @@
 				}
 			},
 			render: function(){
-				console.log(this.props.list);
+                // console.log(this.props.list);
 				var list = [];
 				this.props.list.map(function(item,index){
 					list.push(item)
@@ -92,7 +92,7 @@
 									return (
 										<tr key={ index }>
 											<td>{ item.longUrl }</td>
-											<td><a href={ item.longUrl }>{ item.shortUrl }</a></td>
+                                            <td><a target="__blank" href={item.shortUrl}>{item.shortUrl}</a></td>
 										</tr>
 									)
 								})
@@ -140,7 +140,7 @@
 				        	history: this.state.history
 				      	});
 				      	localStorage.setItem('list', JSON.stringify(this.state.history));
-				      	console.log(localStorage.list[1]);
+                        // console.log(localStorage.list[1]);
 			        }.bind(this),
 			        error: function (jqXHR, textStatus, errorThrown) {
 			            alert("Error requesting " + jqXHR + ": " + textStatus + " " + errorThrown);
