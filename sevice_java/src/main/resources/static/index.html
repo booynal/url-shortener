@@ -1,7 +1,159 @@
-<header>
-    <title>长短url转换服务</title>
-</header>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>URL convert</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/react/15.4.2/react.min.js"></script>
+	<script src="https://cdn.bootcss.com/react/15.4.2/react-dom.min.js"></script>
+	<script src="https://cdn.bootcss.com/babel-standalone/6.22.1/babel.min.js"></script>
+	<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<style>
+		.starter-template{
+			padding: 80px 15px 15px;
+			text-align: center;
+		}
+		.search-wraper{
+			margin-left: auto;
+			margin-right: auto;
+			max-width: 680px;
+			margin-top: 30px;
+			margin-bottom: 20px
+		}
+		.table{
+			margin-top: 50px;
+			padding:20px;
+			border:1px solid #eee;
+		}
+		.table tr{
+			border-bottom: 1px solid #eee;
+		}
+		.table tr td{
+			padding:20px;
+		}
+	</style>
+</head>
 <body>
-欢迎static
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">URL convert</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+	<div class="container">
+		<div class="starter-template">
+        	<h1>longUrl to shortUrl</h1>
+        	<p class="lead">Use this page as a way to quickly convert any longUrl to a shortUrl.<br> Welcom to try and give our surggestion.</p>
+      	</div>
+      	<div id="container"></div>
+	</div>
+	<script type="text/babel">
+		var obj = {
+			placeholder: "please input the longUrl",
+			btnValue: "convert",
+			history: JSON.parse(localStorage.getItem('list')),
+			source: "http://192.168.199.189:8080/long/to/short?url="
+		}
+
+		var ListComponent = React.createClass({
+			getInitialState: function(){
+				return{
+					list: []
+				}
+			},
+			render: function(){
+				console.log(this.props.list);
+				var list = [];
+				this.props.list.map(function(item,index){
+					list.push(item)
+				});
+				list.reverse();
+				return(
+					<div className="table-responsive">
+						<table className="table">
+							{
+								list.map(function(item,index){
+									return (
+										<tr key={ index }>
+											<td>{ item.longUrl }</td>
+											<td><a href={ item.longUrl }>{ item.shortUrl }</a></td>
+										</tr>
+									)
+								})
+							}
+						</table>
+					</div>
+				)
+			}
+		})
+
+		var InputComponent = React.createClass({
+			getInitialState: function(){
+				return {
+					value: "",
+					shortUrl: "",
+					history: this.props.history
+				}
+			},
+			render: function(){
+				return (
+					<div>
+						<div className="search-wraper">
+							<div className="form-group input-group">
+								<input className="form-control search clearable" value={ this.state.value } placeholder={ this.props.placeholder } autocomplete="off" autofocus="" tabindex="0" autocorrect="off" autocapitalize="off" spellcheck="false" onChange={ this.handleChange } />
+			                    <span className="input-group-btn">
+			                        <button className="btn btn-default" type="button" onClick={ this.handleClick }>{ this.props.btnValue }</button>
+			                    </span>
+							</div>
+						</div>
+						<ListComponent list={ this.state.history } />
+					</div>
+				)
+			},
+			handleChange: function(ev){
+				this.setState({value: ev.target.value })
+			},
+			handleClick: function(ev){
+				var source = this.props.source + this.state.value;
+				$.ajax({
+			        url: source,            
+			        success: function (result) {
+						this.state.history.push({longUrl:this.state.value, shortUrl:result});
+				      	this.setState({
+				        	shortUrl: result,
+				        	history: this.state.history
+				      	});
+				      	localStorage.setItem('list', JSON.stringify(this.state.history));
+				      	console.log(localStorage.list[1]);
+			        }.bind(this),
+			        error: function (jqXHR, textStatus, errorThrown) {
+			            alert("Error requesting " + jqXHR + ": " + textStatus + " " + errorThrown);
+			        }
+			    });
+				
+			}
+		})
+
+		ReactDOM.render(
+			<InputComponent { ...obj } />,
+			document.getElementById("container")
+		)
+	</script>
 </body>
+</html>
