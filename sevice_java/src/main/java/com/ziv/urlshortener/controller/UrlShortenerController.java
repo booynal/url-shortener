@@ -1,5 +1,6 @@
 package com.ziv.urlshortener.controller;
 
+import com.ziv.urlshortener.constant.UrlShortenerConstant;
 import com.ziv.urlshortener.service.UrlShortenerService;
 import com.ziv.urlshortener.util.ShortUrlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class UrlShortenerController {
 		return null;
 	}
 
-	@RequestMapping(value = "/s{shortCode}", method = RequestMethod.GET)
+	@RequestMapping(value = "/" + UrlShortenerConstant.SHORT_CODE_PREFIX + "{shortCode}", method = RequestMethod.GET)
 	public void shortToLong(HttpServletRequest request, HttpServletResponse response, @PathVariable String shortCode) {
 		if (null == shortCode || shortCode.isEmpty()) {
 			return;
