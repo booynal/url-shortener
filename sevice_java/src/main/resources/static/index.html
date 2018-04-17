@@ -78,7 +78,6 @@
 				}
 			},
 			render: function(){
-                // console.log(this.props.list);
 				var list = [];
 				this.props.list.map(function(item,index){
 					list.push(item)
@@ -108,7 +107,8 @@
 				return {
 					value: "",
 					shortUrl: "",
-					history: this.props.history ? this.props.history : []
+					history: this.props.history ? this.props.history : [],
+					msg: ""
 				}
 			},
 			render: function(){
@@ -121,31 +121,40 @@
 			                        <button className="btn btn-default" type="button" onClick={ this.handleClick }>{ this.props.btnValue }</button>
 			                    </span>
 							</div>
+							<div class="warning">{ this.state.msg }</div>
 						</div>
 						<ListComponent list={ this.state.history } />
 					</div>
 				)
 			},
 			handleChange: function(ev){
-				this.setState({value: ev.target.value })
+				if(ev.target.value == ""){
+					setState({msg: "the longUrl can't be null"});
+				}else{
+					this.setState({
+						msg: "",
+						value: ev.target.value
+					});
+				}
 			},
 			handleClick: function(ev){
-				var source = this.props.source + this.state.value;
-				$.ajax({
-			        url: source,            
-			        success: function (result) {
-						this.state.history.push({longUrl:this.state.value, shortUrl:result});
-				      	this.setState({
-				        	shortUrl: result,
-				        	history: this.state.history
-				      	});
-				      	localStorage.setItem('list', JSON.stringify(this.state.history));
-                        // console.log(localStorage.list[1]);
-			        }.bind(this),
-			        error: function (jqXHR, textStatus, errorThrown) {
-			            alert("Error requesting " + jqXHR + ": " + textStatus + " " + errorThrown);
-			        }
-			    });
+				if(this.state.value != ""){
+					var source = this.props.source + this.state.value;
+					$.ajax({
+				        url: source,            
+				        success: function (result) {
+							this.state.history.push({longUrl:this.state.value, shortUrl:result});
+					      	this.setState({
+					        	shortUrl: result,
+					        	history: this.state.history
+					      	});
+					      	localStorage.setItem('list', JSON.stringify(this.state.history));
+				        }.bind(this),
+				        error: function (jqXHR, textStatus, errorThrown) {
+				            alert("Error requesting " + jqXHR + ": " + textStatus + " " + errorThrown);
+				        }
+				    });
+			    }
 				
 			}
 		})
